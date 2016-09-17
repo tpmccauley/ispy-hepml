@@ -1,0 +1,101 @@
+body.black {
+  background-color: black;
+}
+
+body.white {
+  background-color: white;
+}
+
+canvas { width: 100%; height: 100% }
+
+#stats {
+  position: absolute;
+  top:0;
+  left: 0;
+}
+
+
+.bordered {
+  border: thin solid gray;
+}
+
+#titlebar {
+  height: 25px;
+}
+
+#titlebar.black {
+  color: white;
+  background-color: black;
+}
+
+#titlebar.white {
+  color: black;
+  background-color: white;
+}
+
+#toolbar {
+  float: left;
+}
+
+#toolbar.black {
+  color: white;
+  background-color: black;
+}
+
+#toolbar.white {
+  color: black;
+  background-color: white;
+}
+
+#toolbar img {
+  width: 20px;
+  height: 20px;
+}
+
+#toolbar .button-toolbar {
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+.btn {
+  background-color: #dfdfdf;
+}
+
+.btn.active {
+  background-color: #bbb;
+}
+
+#display {
+  overflow: hidden;
+  padding: 0;
+}
+
+#display.black {
+  color: white;
+  background-color: black;
+}
+
+#display.white {
+  color: black;
+  background-color: white;
+}
+
+.modal-dialog button.close {
+  color: red;
+  text-shadow: none;
+  opacity: 1.0;
+}
+
+.modal-content.black {
+  color: white;
+  background-color: black;
+}
+
+.modal-content.white {
+  color: black;
+  background-color: white;
+}
+
+.modal-content div {
+  border: 0;
+}

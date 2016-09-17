@@ -1,0 +1,186 @@
+<!-- thomas.mccauley@cern.ch -->
+<!DOCTYPE html>
+<head>
+	<meta charset=utf-8>
+
+	<title>iSpy HEPML</title>
+
+	<link rel="stylesheet" href="./css/bootstrap.min.css">
+	<link rel="stylesheet" href="./css/font-awesome.min.css">
+	<link rel="stylesheet" href="./css/ispy-hepml.css">
+
+	<script src="js/three.min.js"></script>
+	<script src="js/stats.min.js"></script>
+	<script src="js/jquery-1.11.1.min.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+	<script src="js/chroma.min.js"></script>
+
+	<script src="js/TrackballControls.js"></script>
+	<script src="js/OrthographicTrackballControls.js"></script>
+	<script src="js/OrbitControls.js"></script>
+
+	<script src="js/ispy-hepml.js"></script>
+</head>
+
+<body class="black">
+	<div class="container-fluid">
+
+		<div class="row">
+			<div class="col-lg-12 black" id="titlebar">
+				<div class=row">
+					<div class="col-lg-6" id="application-name">iSpy HEPML</div>
+					<div class="col-lg-6" id="event-loaded"></div>
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-lg-12 black" id="toolbar">
+				<div class="button-toolbar" role="toolbar">
+					<div class="btn-group" role="group">
+						<button type="button" class="btn btn-default" data-toggle="modal" data-target="#open-file" title="Open File">
+							<i class="fa fa-folder-open"></i>
+						</button>
+					</div>
+					<div class="btn-group" role="group">
+						<button type="button" class="btn btn-default" onclick="alert('reload not implemented yet');" title="Reload page">
+							<i class="fa fa-refresh"></i>
+						</button>
+					</div>
+					<div class="btn-group" role="group">
+						<button type="button" class="btn btn-default disabled" id="prev-event-button" onclick="hepml.prevEvent();" title="Previous Event">
+							<i class="fa fa-step-backward"></i>
+						</button>
+						<button type="button" class="btn btn-default disabled" id="next-event-button" onclick="hepml.nextEvent();" title="Next Event">
+							<i class="fa fa-step-forward"></i>
+						</button>
+					</div>
+					<div class="btn-group" role="group">
+						<button type="button" class="btn btn-default" onclick="hepml.resetControls();" title="Return to Start View">
+							<i class="fa fa-home"></i>
+						</button>
+					</div>
+					<div class="btn-group" role="group">
+						<button type="button" class="btn btn-default" onclick="alert('zoom in not implemented yet');" title="Zoom In [Shift + Up Arrow]">
+							<i class="fa fa-search-plus"></i>
+						</button>
+						<button type="button" class="btn btn-default" onclick="alert('zoom out not implemented yet');" title="Zoom Out [Shift + Down Arrow]">
+							<i class="fa fa-search-minus"></i>
+						</button>
+					</div>
+					<div class="btn-group" role="group">
+						<button type="button" class="btn btn-default" onclick="hepml.setYX();" title="YX Plane">
+							<img src="./img/yx_small.png" class="img-responsive"/>
+						</button>
+						<button type="button" class="btn btn-default" onclick="hepml.setYZ();" title="YZ plane">
+							<img src="./img/yz_small.png" class="img-responsive"/>
+						</button>
+						<button type="button" class="btn btn-default" onclick="hepml.setXZ();" title="XZ plane">
+							<img src="./img/xz_small.png" class="img-responsive" title=""/>
+						</button>
+					</div>
+					<div class="btn-group" role="group">
+						<button type="button" id="perspective" class="btn btn-default active" onclick="alert('on perspective');" title="Perspective Projection">
+							<img src="./img/perspective-projection.png" class="img-responsive"/>
+						</button>
+						<button type="button" id="orthographic" class="btn btn-default" onclick="alert('orthographic projection not implemented yet');" title="Orthographic Projection">
+							<img src="./img/orthographic-projection.png" class="img-responsive"/>
+						</button>
+					</div>
+					<div class="btn-group" role="group">
+						<button type="button" id="enterFullscreen" class="btn btn-default" onclick="alert('fullscreen not implemented yet');" title="Expand to Fullscreen">
+							<i class="fa fa-expand"></i>
+						</button>
+						<button type="button" id="exitFullscreen" class="btn btn-default active" onclick="alert('exit fullscreen not implemented yet');" title="Exit Fullscreen">
+							<i class="fa fa-compress"></i>
+						</button>
+					</div>
+					<div class="btn-group" role="group">
+						<button type="button" class="btn btn-default" data-toggle="modal" data-target="#settings" title="Settings">
+							<i class="fa fa-gear"></i>
+						</button>
+					</div>
+					<div class="btn-group" role="group">
+						<button type="button" class="btn btn-default" data-toggle="modal" data-target="#about" title="About">
+							<i class="fa fa-info"></i>
+						</button>
+					</div>
+					<div class="btn-group" role="group">
+						<button type="button" class="btn btn-default" onclick="alert('print image not implemented yet');" title="Print Image to File">
+							<i class="fa fa-file-image-o"></i>
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-lg-12 black" id="display">
+				<div id="axes"></div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		$(function() {
+  		console.log(hepml.version);
+			hepml.init();
+			hepml.makeDetector({wireframe:true});
+			hepml.render();
+		});
+	</script>
+
+</body>
+
+<div id="open-file" role="dialog" class="modal">
+	<div class="modal-dialog modal-sm">
+		<div class="modal-content bordered black">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"><i class="fa fa-times"></i><span class="sr-only">Close</span></button>
+				<h4 class="modal-title black">Open File</h4>
+			</div>
+			<div class="modal-body">
+				<table>
+					<p>
+						Open local file: <input type="file" id="local-file" onchange="hepml.loadData();" onclick="$('#open-file').modal('hide');"/>
+					</p>
+				</table>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="settings" role="dialog" class="modal">
+	<div class="modal-dialog modal-sm">
+		<div class="modal-content bordered black">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"><i class="fa fa-times"></i><span class="sr-only">Close</span></button>
+				<h4 class="modal-title black">Settings</h4>
+			</div>
+			<div class="modal-body">
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="about" role="dialog" class="modal">
+	<div class="modal-dialog modal-sm">
+		<div class="modal-content bordered black">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"><i class="fa fa-times"></i><span class="sr-only">Close</span></button>
+				<h4 class="modal-title black">About</h4>
+			</div>
+			<div class="modal-body">
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</div>
+</div>
