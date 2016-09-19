@@ -14,9 +14,9 @@ hepml.init = function() {
   document.getElementById('display').appendChild(hepml.stats.domElement);
 
   hepml.camera = new THREE.PerspectiveCamera(75, w/h, 0.1, 1000);
-  hepml.camera.position.x = 4;
-  hepml.camera.position.y = 4;
-  hepml.camera.position.z = 4;
+  hepml.camera.position.x = 15;
+  hepml.camera.position.y = 15;
+  hepml.camera.position.z = 15;
 
   hepml.renderer = new THREE.WebGLRenderer({antialias:true});
   hepml.renderer.setSize(w, h);
@@ -111,84 +111,88 @@ hepml.setYZ = function() {
 
 };
 
-hepml.makeDetector = function(style) {
+hepml.makeECAL = function(style) {
 
   var nx = 24;
   var ny = 24;
   var nz = 25;
 
-  var cx = 0.10;
-  var cy = 0.10;
-  var cz = 0.10;
+  var cx = 0.5;
+  var cy = 0.5;
+  var cz = 0.5;
 
-  var material;
-  var geometry;
+  var material = new THREE.LineBasicMaterial({
+    color: 0xaaaaaa,
+    linewidth: 0.1,
+    depthWrite: true,
+    transparent:true,
+    opacity: 0.1
+  });
 
-  if ( style.wireframe === true) {
-
-    material = new THREE.LineBasicMaterial({
-                        color: 0xaaaaaa,
-                        linewidth: 0.1,
-                        depthWrite: true,
-                        transparent:true,
-                        opacity: 0.1});
-
-    geometry = new THREE.Geometry();
-
-    var f1 = new THREE.Vector3(-cx*0.5,-cy*0.5, cz*0.5);
-    var f2 = new THREE.Vector3(-cx*0.5, cy*0.5, cz*0.5);
-    var f3 = new THREE.Vector3( cx*0.5, cy*0.5, cz*0.5);
-    var f4 = new THREE.Vector3( cx*0.5,-cy*0.5, cz*0.5);
-
-    var b1 = new THREE.Vector3(-cx*0.5,-cy*0.5,-cz*0.5);
-    var b2 = new THREE.Vector3(-cx*0.5, cy*0.5,-cz*0.5);
-    var b3 = new THREE.Vector3( cx*0.5, cy*0.5,-cz*0.5);
-    var b4 = new THREE.Vector3( cx*0.5,-cy*0.5,-cz*0.5);
-
-    geometry.vertices.push(f1,f2);
-    geometry.vertices.push(f2,f3);
-    geometry.vertices.push(f3,f4);
-    geometry.vertices.push(f4,f1);
-
-    geometry.vertices.push(b1,b2);
-    geometry.vertices.push(b2,b3);
-    geometry.vertices.push(b3,b4);
-    geometry.vertices.push(b4,b1);
-
-    geometry.vertices.push(b1,f1);
-    geometry.vertices.push(b3,f3);
-    geometry.vertices.push(b2,f2);
-    geometry.vertices.push(b4,f4);
-  } else {
-
-    material = new THREE.MeshBasicMaterial({
-                        color: 0xd3d3d3,
-                        transparent:true,
-                        opacity: 0.1});
-
-    geometry = new THREE.BoxGeometry(cx,cy,cz);
-  }
+  var boxes = new THREE.Geometry();
 
   for ( var i = 0; i < nx; i++ ) {
     for ( var j = 0; j < ny; j++ ) {
       for ( var k = 0; k < nz; k++ ) {
 
-        var box;
-        if ( style.wireframe === true ) {
-          box = new THREE.LineSegments(geometry, material);
-        } else {
-          box = new THREE.Mesh(geometry, material);
-        }
+        var box = new THREE.Geometry();
 
-        box.position.x = (i + 0.5)*cx - nx*cx*0.5;
-        box.position.y = (j + 0.5)*cy - ny*cy*0.5;
-        box.position.z = (k + 0.5)*cz;
+        var shift = new THREE.Vector3((i + 0.5)*cx - nx*cx*0.5, (j + 0.5)*cy - ny*cy*0.5, (k + 0.5)*cz)
 
-        hepml.scene.getObjectByName('Detector').add(box);
+        var f1 = new THREE.Vector3(-cx*0.5,-cy*0.5, cz*0.5);
+        var f2 = new THREE.Vector3(-cx*0.5, cy*0.5, cz*0.5);
+        var f3 = new THREE.Vector3( cx*0.5, cy*0.5, cz*0.5);
+        var f4 = new THREE.Vector3( cx*0.5,-cy*0.5, cz*0.5);
+
+        f1.add(shift);
+        f2.add(shift);
+        f3.add(shift);
+        f4.add(shift);
+
+        var b1 = new THREE.Vector3(-cx*0.5,-cy*0.5,-cz*0.5);
+        var b2 = new THREE.Vector3(-cx*0.5, cy*0.5,-cz*0.5);
+        var b3 = new THREE.Vector3( cx*0.5, cy*0.5,-cz*0.5);
+        var b4 = new THREE.Vector3( cx*0.5,-cy*0.5,-cz*0.5);
+
+        b1.add(shift);
+        b2.add(shift);
+        b3.add(shift);
+        b4.add(shift);
+
+        box.vertices.push(f1,f2);
+        box.vertices.push(f2,f3);
+        box.vertices.push(f3,f4);
+        box.vertices.push(f4,f1);
+
+        box.vertices.push(b1,b2);
+        box.vertices.push(b2,b3);
+        box.vertices.push(b3,b4);
+        box.vertices.push(b4,b1);
+
+        box.vertices.push(b1,f1);
+        box.vertices.push(b3,f3);
+        box.vertices.push(b2,f2);
+        box.vertices.push(b4,f4);
+
+        boxes.merge(box);
 
       }
     }
   }
+
+  ecal = new THREE.LineSegments(boxes, material);
+  ecal.name = 'ECAL';
+  hepml.scene.getObjectByName('Detector').add(ecal);
+
+};
+
+hepml.makeHCAL = function(style) {};
+
+hepml.makeDetector = function(style) {
+
+  hepml.makeECAL();
+  //hepml.makeHCAL();
+
 };
 
 hepml.loadData = function() {
@@ -225,9 +229,9 @@ hepml.addEvent = function() {
   var ny = 24;
   var nz = 25;
 
-  var cx = 0.10;
-  var cy = 0.10;
-  var cz = 0.10;
+  var cx = 0.5;
+  var cy = 0.5;
+  var cz = 0.5;
 
   var material = new THREE.MeshBasicMaterial({color: 0xff0000, transparent:true, opacity:1});
 
@@ -272,6 +276,7 @@ hepml.addEvent = function() {
     box.position.z = z;
 
     hepml.scene.getObjectByName('Event').add(box);
+
   }
 
 };
