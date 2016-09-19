@@ -15,7 +15,7 @@ hepml.init = function() {
 
   hepml.camera = new THREE.PerspectiveCamera(75, w/h, 0.1, 1000);
   hepml.camera.position.x = -15;
-  hepml.camera.position.y = 20;
+  hepml.camera.position.y = 15;
   hepml.camera.position.z = -15;
 
   hepml.renderer = new THREE.WebGLRenderer({antialias:true});
