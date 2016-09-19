@@ -25,7 +25,16 @@ ei = ecal.shape[1]
 ej = ecal.shape[2]
 ek = ecal.shape[3]
 
-for e in ecal:
+hi = hcal.shape[1]
+hj = hcal.shape[2]
+hk = hcal.shape[3]
+
+assert(ecal.shape[0] == hcal.shape[0] == target.shape[0])
+
+for e in range(ecal.shape[0]):
+
+  ec = ecal[e]
+  hc = hcal[e]
 
   event = {}
   event['primary'] = []
@@ -36,11 +45,20 @@ for e in ecal:
     for j in range(ej):
       for k in range(ek):
 
-        energy = e[i][j][k]
+        energy = ec[i][j][k]
 
         if energy > 0:
           event['ecal'].append([i,j,k,energy])
 
+  for i in range(hi):
+    for j in range(hj):
+      for k in range(hk):
+
+        energy = hc[i][j][k]
+
+        if energy > 0:
+          event['hcal'].append([i,j,k,energy])
+  
   events.append(event)
   en += 1
 

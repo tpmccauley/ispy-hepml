@@ -186,7 +186,80 @@ hepml.makeECAL = function(style) {
 
 };
 
-hepml.makeHCAL = function(style) {};
+hepml.makeHCAL = function(style) {
+
+    var nx = 4;
+    var ny = 4;
+    var nz = 60;
+
+    var cx = 3.0;
+    var cy = 3.0;
+    var cz = 3.0;
+
+    var material = new THREE.LineBasicMaterial({
+      color: 0xaaaaaa,
+      linewidth: 0.1,
+      depthWrite: true,
+      transparent:true,
+      opacity: 0.5
+    });
+
+    var boxes = new THREE.Geometry();
+
+    for ( var i = 0; i < nx; i++ ) {
+      for ( var j = 0; j < ny; j++ ) {
+        for ( var k = 0; k < nz; k++ ) {
+
+          var box = new THREE.Geometry();
+
+          var shift = new THREE.Vector3((i + 0.5)*cx - nx*cx*0.5, (j + 0.5)*cy - ny*cy*0.5, -(k + 0.5)*cz)
+
+          var f1 = new THREE.Vector3(-cx*0.5,-cy*0.5, cz*0.5);
+          var f2 = new THREE.Vector3(-cx*0.5, cy*0.5, cz*0.5);
+          var f3 = new THREE.Vector3( cx*0.5, cy*0.5, cz*0.5);
+          var f4 = new THREE.Vector3( cx*0.5,-cy*0.5, cz*0.5);
+
+          f1.add(shift);
+          f2.add(shift);
+          f3.add(shift);
+          f4.add(shift);
+
+          var b1 = new THREE.Vector3(-cx*0.5,-cy*0.5,-cz*0.5);
+          var b2 = new THREE.Vector3(-cx*0.5, cy*0.5,-cz*0.5);
+          var b3 = new THREE.Vector3( cx*0.5, cy*0.5,-cz*0.5);
+          var b4 = new THREE.Vector3( cx*0.5,-cy*0.5,-cz*0.5);
+
+          b1.add(shift);
+          b2.add(shift);
+          b3.add(shift);
+          b4.add(shift);
+
+          box.vertices.push(f1,f2);
+          box.vertices.push(f2,f3);
+          box.vertices.push(f3,f4);
+          box.vertices.push(f4,f1);
+
+          box.vertices.push(b1,b2);
+          box.vertices.push(b2,b3);
+          box.vertices.push(b3,b4);
+          box.vertices.push(b4,b1);
+
+          box.vertices.push(b1,f1);
+          box.vertices.push(b3,f3);
+          box.vertices.push(b2,f2);
+          box.vertices.push(b4,f4);
+
+          boxes.merge(box);
+
+        }
+      }
+    }
+
+    hcal = new THREE.LineSegments(boxes, material);
+    hcal.name = 'HCAL';
+    hepml.scene.getObjectByName('Detector').add(hcal);
+
+};
 
 hepml.makeDetector = function(style) {
 
@@ -216,14 +289,7 @@ hepml.loadData = function() {
 
 };
 
-hepml.addEvent = function() {
-
-  hepml.scene.getObjectByName('Event').children.length = 0;
-  var data = hepml.events[hepml.event_index];
-
-  var ievent = +hepml.event_index + 1; // JavaScript!
-
-  $("#event-loaded").html(hepml.file_name + ": [" + ievent + " of " + hepml.events.length + "]");
+hepml.addECALhits = function(ecal) {
 
   var nx = 24;
   var ny = 24;
@@ -237,8 +303,8 @@ hepml.addEvent = function() {
 
   var maxe = 0;
 
-  for ( var e in data.ecal ) {
-    var energy = data.ecal[e][3];
+  for ( var e in ecal ) {
+    var energy = ecal[e][3];
     if ( energy > maxe ) {
       maxe = energy;
     }
@@ -246,20 +312,16 @@ hepml.addEvent = function() {
 
   var colors = chroma.scale('Spectral').domain([1,0]);
 
-  for ( var e in data.ecal ) {
+  for ( var e in ecal ) {
 
-    var hit = data.ecal[e];
+    var hit = ecal[e];
 
-    var i = Math.abs(data.ecal[e][0] - 24);
-    var j = Math.abs(data.ecal[e][1] - 24);
-    var k = Math.abs(data.ecal[e][2] - 25);
+    var i = Math.abs(ecal[e][0] - 24);
+    var j = Math.abs(ecal[e][1] - 24);
+    var k = Math.abs(ecal[e][2] - 25);
 
-    var energy = data.ecal[e][3];
+    var energy = ecal[e][3];
     var s = energy / maxe;
-
-    if ( s < 0.1 ) {
-      continue;
-    }
 
     var o = 1.0;
 
@@ -278,6 +340,20 @@ hepml.addEvent = function() {
     hepml.scene.getObjectByName('Event').add(box);
 
   }
+
+};
+
+
+hepml.addEvent = function() {
+
+  hepml.scene.getObjectByName('Event').children.length = 0;
+  var data = hepml.events[hepml.event_index];
+
+  var ievent = +hepml.event_index + 1; // JavaScript!
+
+  $("#event-loaded").html(hepml.file_name + ": [" + ievent + " of " + hepml.events.length + "]");
+
+  hepml.addECALhits(data.ecal);
 
 };
 
