@@ -14,9 +14,9 @@ hepml.init = function() {
   document.getElementById('display').appendChild(hepml.stats.domElement);
 
   hepml.camera = new THREE.PerspectiveCamera(75, w/h, 0.1, 1000);
-  hepml.camera.position.x = 15;
-  hepml.camera.position.y = 15;
-  hepml.camera.position.z = 15;
+  hepml.camera.position.x = -15;
+  hepml.camera.position.y = 20;
+  hepml.camera.position.z = -15;
 
   hepml.renderer = new THREE.WebGLRenderer({antialias:true});
   hepml.renderer.setSize(w, h);
@@ -137,7 +137,8 @@ hepml.makeECAL = function(style) {
 
         var box = new THREE.Geometry();
 
-        var shift = new THREE.Vector3((i + 0.5)*cx - nx*cx*0.5, (j + 0.5)*cy - ny*cy*0.5, (k + 0.5)*cz)
+        var shift = new THREE.Vector3((i + 0.5)*cx, (j + 0.5)*cy, (k + 0.5)*cz);
+        shift.z -= 15;
 
         var f1 = new THREE.Vector3(-cx*0.5,-cy*0.5, cz*0.5);
         var f2 = new THREE.Vector3(-cx*0.5, cy*0.5, cz*0.5);
@@ -212,7 +213,8 @@ hepml.makeHCAL = function(style) {
 
           var box = new THREE.Geometry();
 
-          var shift = new THREE.Vector3((i + 0.5)*cx - nx*cx*0.5, (j + 0.5)*cy - ny*cy*0.5, -(k + 0.5)*cz)
+          var shift = new THREE.Vector3((i + 0.5)*cx, (j + 0.5)*cy, (k + 0.5)*cz);
+          shift.z += 5;
 
           var f1 = new THREE.Vector3(-cx*0.5,-cy*0.5, cz*0.5);
           var f2 = new THREE.Vector3(-cx*0.5, cy*0.5, cz*0.5);
@@ -264,7 +266,7 @@ hepml.makeHCAL = function(style) {
 hepml.makeDetector = function(style) {
 
   hepml.makeECAL();
-  //hepml.makeHCAL();
+  hepml.makeHCAL();
 
 };
 
@@ -316,17 +318,17 @@ hepml.addECALhits = function(ecal) {
 
     var hit = ecal[e];
 
-    var i = Math.abs(ecal[e][0] - 24);
-    var j = Math.abs(ecal[e][1] - 24);
-    var k = Math.abs(ecal[e][2] - 25);
+    var i = ecal[e][0];
+    var j = ecal[e][1];
+    var k = ecal[e][2];
 
     var energy = ecal[e][3];
     var s = energy / maxe;
 
     var o = 1.0;
 
-    var x = (i + 0.5)*cx - nx*cx*0.5;
-    var y = (j + 0.5)*cy - ny*cy*0.5;
+    var x = (i + 0.5)*cx;
+    var y = (j + 0.5)*cy;
     var z = (k + 0.5)*cz;
 
     var c = colors(s);
@@ -335,7 +337,7 @@ hepml.addECALhits = function(ecal) {
 
     box.position.x = x;
     box.position.y = y;
-    box.position.z = z;
+    box.position.z -= 15;
 
     hepml.scene.getObjectByName('Event').add(box);
 
@@ -343,6 +345,60 @@ hepml.addECALhits = function(ecal) {
 
 };
 
+
+hepml.addHCALhits = function(hcal) {
+
+  var nx = 4;
+  var ny = 4;
+  var nz = 60;
+
+  var cx = 3.0;
+  var cy = 3.0;
+  var cz = 3.0;
+
+  var material = new THREE.MeshBasicMaterial({color: 0xff0000, transparent:true, opacity:1});
+
+  var maxe = 0;
+
+  for ( var h in hcal ) {
+    var energy = hcal[h][3];
+    if ( energy > maxe ) {
+      maxe = energy;
+    }
+  }
+
+  var colors = chroma.scale('Spectral').domain([1,0]);
+
+  for ( var h in hcal ) {
+
+    var hit = hcal[h];
+
+    var i = hcal[h][0];
+    var j = hcal[h][1];
+    var k = hcal[h][2];
+
+    var energy = hcal[h][3];
+    var s = energy / maxe;
+
+    var o = 1.0;
+
+    var x = (i + 0.5)*cx;
+    var y = (j + 0.5)*cy;
+    var z = (k + 0.5)*cz;
+
+    var c = colors(s);
+    var color = new THREE.Color(c._rgb[0]/255, c._rgb[1]/255, c._rgb[2]/255);
+    var box = new THREE.Mesh(new THREE.BoxGeometry(s*cx,s*cy,s*cz), new THREE.MeshBasicMaterial({color:color, transparent:true, opacity:o}));
+
+    box.position.x = x;
+    box.position.y = y;
+    box.position.z += 5;
+
+    hepml.scene.getObjectByName('Event').add(box);
+
+  }
+
+};
 
 hepml.addEvent = function() {
 
@@ -354,6 +410,7 @@ hepml.addEvent = function() {
   $("#event-loaded").html(hepml.file_name + ": [" + ievent + " of " + hepml.events.length + "]");
 
   hepml.addECALhits(data.ecal);
+  hepml.addHCALhits(data.hcal);
 
 };
 
