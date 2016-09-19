@@ -337,7 +337,7 @@ hepml.addECALhits = function(ecal) {
 
     box.position.x = x;
     box.position.y = y;
-    box.position.z -= 15;
+    box.position.z = z - 15;
 
     hepml.scene.getObjectByName('Event').add(box);
 
@@ -392,7 +392,7 @@ hepml.addHCALhits = function(hcal) {
 
     box.position.x = x;
     box.position.y = y;
-    box.position.z += 5;
+    box.position.z = z + 5;
 
     hepml.scene.getObjectByName('Event').add(box);
 
