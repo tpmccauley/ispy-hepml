@@ -50,6 +50,9 @@ hepml.init = function() {
   hepml.renderer.domElement.addEventListener('mousemove', hepml.onMouseMove, false);
   hepml.renderer.domElement.addEventListener('mousedown', hepml.onMouseDown, false);
 
+  hepml.get_image_data = false;
+  hepml.image_data = null;
+
   /*
     Detector
         ECAL
@@ -106,6 +109,13 @@ hepml.render = function() {
 
   requestAnimationFrame(hepml.render);
   hepml.renderer.render(hepml.scene, hepml.camera);
+
+  if ( hepml.get_image_data ){
+
+    hepml.image_data = hepml.renderer.domElement.toDataURL();
+    hepml.get_image_data = false;
+
+  }
 
   hepml.controls.update();
   hepml.stats.update();
@@ -221,6 +231,15 @@ hepml.reload = function() {
   location.reload();
 
 };
+
+hepml.print = function() {
+
+  hepml.get_image_data = true;
+  hepml.render();
+  window.open(hepml.image_data, "toDataURL() image", "width=800, height=400");
+
+};
+
 
 hepml.onMouseMove = function(e) {
 
