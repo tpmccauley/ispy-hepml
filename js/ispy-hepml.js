@@ -41,16 +41,53 @@ hepml.init = function() {
   axes.name = 'Axes';
   hepml.scene.add(axes);
 
+  /*
+    Detector
+        ECAL
+        HCAL
+    Event
+        EHits
+        HHits
+  */
+
   var dobj = new THREE.Object3D();
   dobj.name = 'Detector';
   dobj.visible = true;
+
+  var ecal = new THREE.Object3D();
+  ecal.name = 'ECAL';
+  ecal.visible = true;
+
+  var hcal = new THREE.Object3D();
+  hcal.name = 'HCAL';
+  hcal.visible = true;
+
+  dobj.add(ecal);
+  dobj.add(hcal);
 
   var eobj = new THREE.Object3D();
   eobj.name = 'Event';
   eobj.visible = true;
 
+  var ehits = new THREE.Object3D();
+  ehits.name = 'EHits';
+  ehits.visible = true;
+
+  var hhits = new THREE.Object3D();
+  hhits.name = 'HHits';
+  hhits.visible = true;
+
+  eobj.add(ehits);
+  eobj.add(hhits);
+
   hepml.scene.add(dobj);
   hepml.scene.add(eobj);
+
+  // FF keeps the check state on reload so force the start states
+  $('#show-ecal').prop('checked', true);
+  $('#show-hcal').prop('checked', true);
+  $('#show-ecal-hits').prop('checked', false);
+  $('#show-hcal-hits').prop('checked', false);
 
   console.log(hepml.scene);
 
@@ -108,6 +145,65 @@ hepml.setYZ = function() {
   hepml.camera.up = new THREE.Vector3(0,1,0);
 
   hepml.camera.lookAt(new THREE.Vector3(0,0,0));
+
+};
+
+hepml.toggle = function(name) {
+
+  hepml.scene.getObjectByName(name).visible = ! hepml.scene.getObjectByName(name).visible;
+
+};
+
+
+hepml.enterFullscreen = function() {
+
+  var container = document.getElementById('hepml');
+
+  if ( container.requestFullscreen ) {
+    container.requestFullscreen();
+  } else if ( container.msRequestFullscreen ) {
+    container.msRequestFullscreen();
+  } else if ( container.mozRequestFullScreen ) {
+    container.mozRequestFullScreen();
+  } else if ( container.webkitRequestFullscreen ) {
+    container.webkitRequestFullscreen();
+  } else {
+    alert('Cannot go to full screen!');
+  }
+
+};
+
+hepml.exitFullscreen = function() {
+
+  if ( document.exitFullscreen ) {
+    document.exitFullscreen();
+  } else if ( document.msExitFullscreen ) {
+    document.msExitFullscreen();
+  } else if ( document.mozCancelFullScreen ) {
+    document.mozCancelFullScreen();
+  } else if ( document.webkitExitFullscreen ) {
+    document.webkitExitFullscreen();
+  } else {
+    alert('Cannot exit full screen. Try Esc?');
+  }
+
+};
+
+hepml.toggleFullscreen = function() {
+
+  $('#enterFullscreen').toggleClass('active');
+  $('#exitFullscreen').toggleClass('active');
+
+};
+
+document.addEventListener('webkitfullscreenchange', hepml.toggleFullscreen, false);
+document.addEventListener('mozfullscreenchange', hepml.toggleFullscreen, false);
+document.addEventListener('fullscreenchange', hepml.toggleFullscreen, false);
+document.addEventListener('MSFullscreenChange', hepml.toggleFullscreen, false);
+
+hepml.reload = function() {
+
+  location.reload();
 
 };
 
@@ -182,8 +278,7 @@ hepml.makeECAL = function(style) {
   }
 
   ecal = new THREE.LineSegments(boxes, material);
-  ecal.name = 'ECAL';
-  hepml.scene.getObjectByName('Detector').add(ecal);
+  hepml.scene.getObjectByName('ECAL').add(ecal);
 
 };
 
@@ -258,8 +353,7 @@ hepml.makeHCAL = function(style) {
     }
 
     hcal = new THREE.LineSegments(boxes, material);
-    hcal.name = 'HCAL';
-    hepml.scene.getObjectByName('Detector').add(hcal);
+    hepml.scene.getObjectByName('HCAL').add(hcal);
 
 };
 
@@ -313,6 +407,7 @@ hepml.addECALhits = function(ecal) {
   }
 
   var colors = chroma.scale('Spectral').domain([1,0]);
+  var ehits = hepml.scene.getObjectByName('EHits');
 
   for ( var e in ecal ) {
 
@@ -339,9 +434,11 @@ hepml.addECALhits = function(ecal) {
     box.position.y = y;
     box.position.z = z - 15;
 
-    hepml.scene.getObjectByName('Event').add(box);
+    ehits.add(box);
 
   }
+
+  $('#show-ecal-hits').prop('checked', true);
 
 };
 
@@ -368,6 +465,7 @@ hepml.addHCALhits = function(hcal) {
   }
 
   var colors = chroma.scale('Spectral').domain([1,0]);
+  var hhits = hepml.scene.getObjectByName('HHits');
 
   for ( var h in hcal ) {
 
@@ -394,15 +492,19 @@ hepml.addHCALhits = function(hcal) {
     box.position.y = y;
     box.position.z = z + 5;
 
-    hepml.scene.getObjectByName('Event').add(box);
+    hhits.add(box);
 
   }
+
+  $('#show-hcal-hits').prop('checked', true);
 
 };
 
 hepml.addEvent = function() {
 
-  hepml.scene.getObjectByName('Event').children.length = 0;
+  hepml.scene.getObjectByName('EHits').children.length = 0;
+  hepml.scene.getObjectByName('HHits').children.length = 0;
+
   var data = hepml.events[hepml.event_index];
 
   var ievent = +hepml.event_index + 1; // JavaScript!
