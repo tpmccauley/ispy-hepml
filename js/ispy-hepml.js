@@ -14,6 +14,9 @@ hepml.init = function() {
   document.getElementById('display').appendChild(hepml.stats.domElement);
 
   hepml.camera = new THREE.PerspectiveCamera(75, w/h, 0.1, 1000);
+  // width, height, fov, near, far, orthoNear, orthoFar
+  //hepml.camera = new THREE.CombinedCamera(w, h, 75, 0.1, 1000, 0.1, 1000);
+
   hepml.camera.position.x = -15;
   hepml.camera.position.y = 15;
   hepml.camera.position.z = -15;
@@ -130,7 +133,7 @@ hepml.resetControls = function() {
 
 hepml.zoom = function(step) {
 
-  alert('Zoom not implemented yet');
+  var zoom = hepml.camera.zoom;
 
 };
 
@@ -170,6 +173,22 @@ hepml.setYZ = function() {
   hepml.camera.up = new THREE.Vector3(0,1,0);
 
   hepml.camera.lookAt(new THREE.Vector3(0,0,0));
+
+};
+
+hepml.perspective = function() {
+
+  //hepml.camera.toPerspective();
+  $('#perspective').toggleClass('active');
+  $('#orthographic').toggleClass('active');
+
+};
+
+hepml.orthographic = function() {
+
+  //hepml.camera.toOrthographic();
+  $('#perspective').toggleClass('active');
+  $('#orthographic').toggleClass('active');
 
 };
 
