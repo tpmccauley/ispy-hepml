@@ -41,6 +41,15 @@ hepml.init = function() {
   axes.name = 'Axes';
   hepml.scene.add(axes);
 
+  hepml.raycaster = new THREE.Raycaster();
+  hepml.raycaster.linePrecision = 0.1;
+
+  hepml.mouse = new THREE.Vector2();
+  hepml.intersected = null;
+
+  hepml.renderer.domElement.addEventListener('mousemove', hepml.onMouseMove, false);
+  hepml.renderer.domElement.addEventListener('mousedown', hepml.onMouseDown, false);
+
   /*
     Detector
         ECAL
@@ -106,6 +115,12 @@ hepml.render = function() {
 hepml.resetControls = function() {
 
   hepml.controls.reset();
+
+};
+
+hepml.zoom = function(step) {
+
+  alert('Zoom not implemented yet');
 
 };
 
@@ -206,6 +221,33 @@ hepml.reload = function() {
   location.reload();
 
 };
+
+hepml.onMouseMove = function(e) {
+
+  e.preventDefault();
+
+  var container = $("canvas");
+
+  var w = $('#display').innerWidth();
+  var h = $('#display').innerHeight();
+
+  var doc = document.documentElement;
+  var left = (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0);
+  var top = (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0);
+
+  var offsetX = $('#display').offset().left - left;
+  var offsetY = $('#display').offset().top - top;
+
+  hepml.mouse.x = ((e.clientX-offsetX) / w)*2 - 1;
+  hepml.mouse.y = -((e.clientY-offsetY) / h)*2 +1;
+
+  var vector = new THREE.Vector3(hepml.mouse.x, hepml.mouse.y, 0.5).unproject(hepml.camera);
+  hepml.raycaster.set(hepml.camera.position, vector.subVectors(vector, hepml.camera.position).normalize());
+  var intersects = hepml.raycaster.intersectObject(hepml.scene.getObjectByName('Event'), true);
+
+};
+
+hepml.onMouseDown = function() {};
 
 hepml.makeECAL = function(style) {
 
