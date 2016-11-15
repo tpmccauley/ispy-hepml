@@ -12,6 +12,7 @@
 	<script src="js/three.min.js"></script>
 	<script src="js/stats.min.js"></script>
 	<script src="js/jquery-1.11.1.min.js"></script>
+	<script src="js/stupidtable.min.js"></script>
 	<script src="js/bootstrap.min.js"></script>
 	<script src="js/chroma.min.js"></script>
 
@@ -129,15 +130,15 @@
 							<td><input id="show-hcal" onchange="hepml.toggle('HCAL');" type="checkbox" checked></td>
 						</tr>
 						<tr>
-							<td>Primary</td>
+							<td onclick="hepml.showTable('primary');">Primary</td>
 							<td><input id="show-primary" onchange="hepml.toggle('Primary');" type="checkbox" checked></td></td>
 						</tr>
 						<tr>
-							<td>ECAL Hits</td>
+							<td onclick="hepml.showTable('ecal');">ECAL Hits</td>
 							<td><input id="show-ecal-hits" onchange="hepml.toggle('EHits');" type="checkbox"></td>
 						</tr>
 						<tr>
-							<td>HCAL Hits</td>
+							<td onclick="hepml.showTable('hcal');">HCAL Hits</td>
 							<td><input id="show-hcal-hits" onchange="hepml.toggle('HHits');" type="checkbox"></td>
 						</tr>
 					</tbody>
@@ -151,7 +152,7 @@
 
 		<div class="row">
 			<div class="col-lg-12 bordered black" id="tableview">
-				<table class="table table-hover">
+				<table id="collection-table" class="table table-hover">
 				</table>
 			</div>
 		</div>
@@ -163,6 +164,7 @@
   		console.log(hepml.version);
 			hepml.init();
 			hepml.makeDetector({wireframe:true});
+			hepml.loadEventFile('./data/Pi0Escan_1_1.json');
 			hepml.render();
 		});
 	</script>

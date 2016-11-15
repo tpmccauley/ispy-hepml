@@ -3,6 +3,9 @@ hepml.version = '0.0.1';
 
 hepml.event_index = 0;
 hepml.events = [];
+hepml.event_loaded = false;
+
+hepml.visible = [];
 
 hepml.init = function() {
 
@@ -88,14 +91,17 @@ hepml.init = function() {
   var ehits = new THREE.Object3D();
   ehits.name = 'EHits';
   ehits.visible = true;
+  hepml.visible[ehits.name] = ehits.visible;
 
   var hhits = new THREE.Object3D();
   hhits.name = 'HHits';
   hhits.visible = true;
+  hepml.visible[hhits.name] = hhits.visible;
 
   var primary = new THREE.Object3D();
   primary.name = 'Primary';
   primary.visible = true;
+  hepml.visible[primary.name] = primary.visible;
 
   eobj.add(ehits);
   eobj.add(hhits);
@@ -204,6 +210,7 @@ hepml.orthographic = function() {
 hepml.toggle = function(name) {
 
   hepml.scene.getObjectByName(name).visible = ! hepml.scene.getObjectByName(name).visible;
+  hepml.visible[name] = ! hepml.visible[name];
 
 };
 
@@ -295,8 +302,6 @@ hepml.onMouseMove = function(e) {
 };
 
 hepml.onMouseDown = function() {};
-
-hepml.makePrimary = function(style) {};
 
 hepml.makeECAL = function(style) {
 
@@ -455,14 +460,47 @@ hepml.makeDetector = function(style) {
 
 };
 
+hepml.loadEventFile = function(name) {
+
+  var name_split = name.split("/");
+  hepml.file_name = name_split[name_split.length-1];
+  hepml.event_index = 0;
+
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", name, true);
+  xhr.responseType = 'json';
+
+  xhr.onload = function() {
+
+    if ( this.status === 200) {
+
+      hepml.events = xhr.response;
+      hepml.enableNextPrev();
+      hepml.addEvent();
+
+    } else {
+
+      alert('Error loading event file', name);
+    }
+
+  };
+
+  xhr.send();
+
+};
+
 hepml.loadData = function() {
 
+  hepml.event_index = 0;
+
   hepml.loaded_file = document.getElementById('local-file').files;
+  console.log(hepml.loaded_file);
 
   var reader = new FileReader();
   hepml.file_name = hepml.loaded_file[0].name;
 
   reader.onload = function(e) {
+
     hepml.events = JSON.parse(e.target.result);
     hepml.enableNextPrev();
     hepml.addEvent();
@@ -476,6 +514,70 @@ hepml.loadData = function() {
 
 };
 
+hepml.showTable = function(name) {
+
+  if ( ! hepml.event_loaded ) {
+
+    return;
+
+  }
+
+  var column_names;
+
+  if ( name === 'ecal' || name === 'hcal' ) {
+
+    column_names = ['i','ix','iy','iz','energy'];
+
+  } else if ( name === 'primary' ) {
+
+    column_names = ['i','energy','px','py','pz','pid'];
+
+  }
+
+  var collectionTable = $('#collection-table');
+
+  collectionTable.empty();
+  collectionTable.append('<caption>' + name + '</caption>');
+  collectionTable.append('<thead> <tr>');
+  var collectionTableHead = collectionTable.find('thead').find('tr');
+
+  for ( var c in column_names ) {
+
+    var dataSort = "float";
+    collectionTableHead.append($('<th data-sort="' + dataSort + '"><i class="fa fa-sort"></i> ' + column_names[c] + '</th>'));
+
+  }
+
+  var data = hepml.events[hepml.event_index][name];
+
+  var index = 0;
+
+  for ( var d in data ) {
+
+    var row_content = "<tr>";
+    row_content += "<td>" + index + "</td>";
+    index++;
+
+    for ( var di in data[d] ) {
+
+      row_content += "<td>"+ data[d][di] + "</td>";
+
+    }
+
+      collectionTable.append(row_content);
+  }
+
+  collectionTable.stupidtable().bind('aftertablesort', function(event, data){
+
+    collectionTableHead.find('th').find('i').removeClass().addClass('fa fa-sort');
+    var newClass = "fa fa-sort-" + data.direction;
+    collectionTableHead.find('th').eq(data.column).find('i').removeClass().addClass(newClass);
+
+  });
+
+};
+
+
 hepml.addPrimary = function(p) {
 
   var dir = new THREE.Vector3(0, 0, 1);
@@ -484,6 +586,8 @@ hepml.addPrimary = function(p) {
   // Need to get proper positioning
   var arrow = new THREE.ArrowHelper(dir, new THREE.Vector3(0,0,-17), 2, 0xffff00, 0.5, 1);
   arrow.line.material.linewidth = 3;
+
+  console.log(p[0]);
 
   //hepml.scene.getObjectByName('Primary').add(arrow);
 
@@ -544,10 +648,11 @@ hepml.addECALhits = function(ecal) {
 
   }
 
-  $('#show-ecal-hits').prop('checked', true);
+  if ( ! hepml.event_loaded ) {
+    $('#show-ecal-hits').prop('checked', true);
+  }
 
 };
-
 
 hepml.addHCALhits = function(hcal) {
 
@@ -602,7 +707,9 @@ hepml.addHCALhits = function(hcal) {
 
   }
 
-  $('#show-hcal-hits').prop('checked', true);
+  if ( ! hepml.event_loaded ) {
+    $('#show-hcal-hits').prop('checked', true);
+  }
 
 };
 
@@ -621,6 +728,11 @@ hepml.addEvent = function() {
   hepml.addECALhits(data.ecal);
   hepml.addHCALhits(data.hcal);
   hepml.addPrimary(data.primary);
+
+  hepml.event_loaded = true;
+
+  $('#collection-table').empty();
+  $('#collection-table').append('Click on the names "Primary", "ECAL Hits", or "HCAL Hits" to display here in the table view');
 
 };
 
