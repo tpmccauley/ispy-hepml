@@ -63,6 +63,7 @@ hepml.init = function() {
     Event
         EHits
         HHits
+        Primary
   */
 
   var dobj = new THREE.Object3D();
@@ -92,8 +93,13 @@ hepml.init = function() {
   hhits.name = 'HHits';
   hhits.visible = true;
 
+  var primary = new THREE.Object3D();
+  primary.name = 'Primary';
+  primary.visible = true;
+
   eobj.add(ehits);
   eobj.add(hhits);
+  eobj.add(primary);
 
   hepml.scene.add(dobj);
   hepml.scene.add(eobj);
@@ -101,6 +107,7 @@ hepml.init = function() {
   // FF keeps the check state on reload so force the start states
   $('#show-ecal').prop('checked', true);
   $('#show-hcal').prop('checked', true);
+  $('#show-primary').prop('checked', false);
   $('#show-ecal-hits').prop('checked', false);
   $('#show-hcal-hits').prop('checked', false);
 
@@ -289,6 +296,8 @@ hepml.onMouseMove = function(e) {
 
 hepml.onMouseDown = function() {};
 
+hepml.makePrimary = function(style) {};
+
 hepml.makeECAL = function(style) {
 
   var nx = 24;
@@ -467,6 +476,21 @@ hepml.loadData = function() {
 
 };
 
+hepml.addPrimary = function(p) {
+
+  var dir = new THREE.Vector3(0, 0, 1);
+
+  // dir, origin, length, hex, headLength, headWidth
+  // Need to get proper positioning
+  var arrow = new THREE.ArrowHelper(dir, new THREE.Vector3(0,0,-17), 2, 0xffff00, 0.5, 1);
+  arrow.line.material.linewidth = 3;
+
+  //hepml.scene.getObjectByName('Primary').add(arrow);
+
+  //$('#show-primary').prop('checked', true);
+
+};
+
 hepml.addECALhits = function(ecal) {
 
   var nx = 24;
@@ -586,6 +610,7 @@ hepml.addEvent = function() {
 
   hepml.scene.getObjectByName('EHits').children.length = 0;
   hepml.scene.getObjectByName('HHits').children.length = 0;
+  hepml.scene.getObjectByName('Primary').children.length = 0;
 
   var data = hepml.events[hepml.event_index];
 
@@ -595,6 +620,7 @@ hepml.addEvent = function() {
 
   hepml.addECALhits(data.ecal);
   hepml.addHCALhits(data.hcal);
+  hepml.addPrimary(data.primary);
 
 };
 
