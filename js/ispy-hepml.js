@@ -190,6 +190,8 @@ hepml.orthographic = function() {
   $('#perspective').toggleClass('active');
   $('#orthographic').toggleClass('active');
 
+  alert('orthographic projection not implemented yet');
+
 };
 
 hepml.toggle = function(name) {
