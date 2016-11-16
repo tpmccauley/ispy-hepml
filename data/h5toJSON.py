@@ -5,12 +5,13 @@ import json
 
 events = []
 
-if len(sys.argv) != 3:
-  print('Usage: python h5toJSON.py [h5 input file name] [json output file name]')
+if len(sys.argv) != 4:
+  print('Usage: python h5toJSON.py [h5 input file name] [json output file name] [max number of events]')
   sys.exit()
 
 ifile = h5py.File(sys.argv[1],'r')
 ofile = open(sys.argv[2],'w')
+maxn = int(sys.argv[3])
 
 hcal = np.array(ifile['HCAL'])
 ecal = np.array(ifile['ECAL'])
@@ -34,7 +35,11 @@ tj = target.shape[2]
 
 assert(ecal.shape[0] == hcal.shape[0] == target.shape[0])
 
-for e in range(ecal.shape[0]):
+nevents = ecal.shape[0]
+if ecal.shape[0] > maxn:
+  nevents = maxn
+
+for e in range(nevents):
 
   ec = ecal[e]
   hc = hcal[e]
