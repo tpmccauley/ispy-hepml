@@ -303,15 +303,18 @@ hepml.onMouseMove = function(e) {
 
 hepml.onMouseDown = function() {};
 
+hepml.ecal = [25,25,25,0.4];
+hepml.hcal = [5,5,60,2.0];
+
 hepml.makeECAL = function(style) {
 
-  var nx = 24;
-  var ny = 24;
-  var nz = 25;
+  var nx = hepml.ecal[0];
+  var ny = hepml.ecal[1];
+  var nz = hepml.ecal[2];
 
-  var cx = 0.5;
-  var cy = 0.5;
-  var cz = 0.5;
+  var cx = hepml.ecal[3];
+  var cy = cx;
+  var cz = cx;
 
   var material = new THREE.LineBasicMaterial({
     color: 0xaaaaaa,
@@ -380,13 +383,13 @@ hepml.makeECAL = function(style) {
 
 hepml.makeHCAL = function(style) {
 
-    var nx = 4;
-    var ny = 4;
-    var nz = 60;
+    var nx = hepml.hcal[0];
+    var ny = hepml.hcal[1];
+    var nz = hepml.hcal[2];
 
-    var cx = 3.0;
-    var cy = 3.0;
-    var cz = 3.0;
+    var cx = hepml.hcal[3];
+    var cy = cx;
+    var cz = cx;
 
     var material = new THREE.LineBasicMaterial({
       color: 0xaaaaaa,
@@ -507,7 +510,9 @@ hepml.loadData = function() {
   };
 
   reader.onerror = function(e) {
+
     alert(e);
+
   };
 
   reader.readAsText(hepml.loaded_file[0]);
@@ -530,7 +535,7 @@ hepml.showTable = function(name) {
 
   } else if ( name === 'primary' ) {
 
-    column_names = ['i','energy','px','py','pz','pid'];
+    column_names = ['i','pid','px','py','pz','energy'];
 
   }
 
@@ -597,22 +602,26 @@ hepml.addPrimary = function(p) {
 
 hepml.addECALhits = function(ecal) {
 
-  var nx = 24;
-  var ny = 24;
-  var nz = 25;
+  var nx = hepml.ecal[0];
+  var ny = hepml.ecal[1];
+  var nz = hepml.ecal[2];
 
-  var cx = 0.5;
-  var cy = 0.5;
-  var cz = 0.5;
+  var cx = hepml.ecal[3];
+  var cy = cx;
+  var cz = cx;
 
   var material = new THREE.MeshBasicMaterial({color: 0xff0000, transparent:true, opacity:1});
 
   var maxe = 0;
 
   for ( var e in ecal ) {
+
     var energy = ecal[e][3];
+
     if ( energy > maxe ) {
+
       maxe = energy;
+
     }
   }
 
@@ -649,30 +658,37 @@ hepml.addECALhits = function(ecal) {
   }
 
   if ( ! hepml.event_loaded ) {
+
     $('#show-ecal-hits').prop('checked', true);
+
   }
 
 };
 
 hepml.addHCALhits = function(hcal) {
 
-  var nx = 4;
-  var ny = 4;
-  var nz = 60;
+  var nx = hepml.hcal[0];
+  var ny = hepml.hcal[1];
+  var nz = hepml.hcal[2];
 
-  var cx = 3.0;
-  var cy = 3.0;
-  var cz = 3.0;
+  var cx = hepml.hcal[3];
+  var cy = cx;
+  var cz = cx;
 
   var material = new THREE.MeshBasicMaterial({color: 0xff0000, transparent:true, opacity:1});
 
   var maxe = 0;
 
   for ( var h in hcal ) {
+
     var energy = hcal[h][3];
+
     if ( energy > maxe ) {
+
       maxe = energy;
+
     }
+
   }
 
   var colors = chroma.scale('Spectral').domain([1,0]);
@@ -708,7 +724,9 @@ hepml.addHCALhits = function(hcal) {
   }
 
   if ( ! hepml.event_loaded ) {
+
     $('#show-hcal-hits').prop('checked', true);
+
   }
 
 };
