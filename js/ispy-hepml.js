@@ -8,6 +8,13 @@ hepml.event_loaded = false;
 hepml.visible = [];
 hepml.inverted_colors = false;
 
+hepml.setFramerate = function(fr) {
+
+  hepml.max_framerate = fr;
+  $('#fr').html(fr);
+
+};
+
 hepml.init = function() {
 
   var w = window.innerWidth;
@@ -120,11 +127,18 @@ hepml.init = function() {
 
   console.log(hepml.scene);
 
+  hepml.setFramerate(30.0);
+  $('#fps-slider').prop('value', hepml.max_framerate);
+
 };
 
 hepml.render = function() {
 
-  requestAnimationFrame(hepml.render);
+  setTimeout( function() {
+      requestAnimationFrame(hepml.render);
+    },  1000 / hepml.max_framerate );
+
+  //requestAnimationFrame(hepml.render);
   hepml.renderer.render(hepml.scene, hepml.camera);
 
   if ( hepml.get_image_data ){
