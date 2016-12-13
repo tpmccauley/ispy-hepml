@@ -1,11 +1,12 @@
 var hepml = hepml || {};
-hepml.version = '0.0.1';
+hepml.version = '0.0.2';
 
 hepml.event_index = 0;
 hepml.events = [];
 hepml.event_loaded = false;
 
 hepml.visible = [];
+hepml.inverted_colors = false;
 
 hepml.init = function() {
 
@@ -214,6 +215,31 @@ hepml.toggle = function(name) {
 
 };
 
+hepml.invertColors = function() {
+
+  if ( hepml.inverted_colors ) {
+
+    hepml.renderer.setClearColor(0x000000,1);
+
+  } else {
+
+    hepml.renderer.setClearColor(0xffffff,1);
+
+  }
+
+  $('#body').toggleClass('white').toggleClass('black');
+  $('#titlebar').toggleClass('white').toggleClass('black');
+  $('#toolbar').toggleClass('white').toggleClass('black');
+
+  $('#treeview').toggleClass('white').toggleClass('black');
+  $('.table tr').toggleClass('white').toggleClass('black');
+
+  $('#tableview').toggleClass('white').toggleClass('black');
+  $('.modal-content').toggleClass('white').toggleClass('black');
+
+  hepml.inverted_colors = !hepml.inverted_colors;
+
+}
 
 hepml.enterFullscreen = function() {
 
@@ -559,7 +585,13 @@ hepml.showTable = function(name) {
 
   for ( var d in data ) {
 
-    var row_content = "<tr>";
+    var row_content = "<tr class=";
+
+    if ( hepml.inverted_colors )
+        row_content += "'white'/>";
+    else
+        row_content += "'black'/>";
+
     row_content += "<td>" + index + "</td>";
     index++;
 

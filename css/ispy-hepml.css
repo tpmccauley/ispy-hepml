@@ -19,6 +19,22 @@ canvas { width: 100%; height: 100% }
   border: thin solid gray;
 }
 
+.table > tbody > tr > td {
+  border-top: none;
+}
+
+.table tr.black td {
+  color: white;
+}
+
+.table tr.white td {
+  color: black;
+}
+
+.table-hover tr:hover td {
+  color:black;
+}
+
 #titlebar {
   height: 25px;
 }
@@ -70,35 +86,49 @@ canvas { width: 100%; height: 100% }
   overflow: scroll;
 }
 
-#treeview.black .table-hover tr:hover {
-  background-color: #777;
-}
-
 #treeview.black {
   color: white;
   background-color: black;
 }
 
-#treeview td.black {
+#treeview.white {
+  color: black;
+  background-color: white;
+}
+
+#tableview.black {
   color: white;
+  background-color: black;
 }
 
-.table > thead > tr > th {
-  color: #ffffff;
+#tableview.white {
+  color: black;
+  background-color: white;
 }
 
-.table > tbody > tr > td {
-  border-top: none;
-  color: #ffffff;
+.modal-content.black {
+  color: white;
+  background-color: black;
 }
 
-.table > tbody > tr:hover > td {
-  color: #000000;
+.modal-content.white {
+  color:black;
+  background-color:white;
 }
 
 #tableview {
   height: 140px;
   overflow: scroll;
+}
+
+#tableview.black {
+  color: white;
+  background-color: black;
+}
+
+#tableview.white {
+  color: black;
+  background-color: white;
 }
 
 #display {
