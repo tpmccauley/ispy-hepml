@@ -24,6 +24,28 @@ hepml.init = function() {
   hepml.stats = new Stats();
   document.getElementById('display').appendChild(hepml.stats.domElement);
 
+  // On page load hide the stats
+  $('#stats').hide();
+  // FF keeps the check state on reload so force an "uncheck"
+  $('#show-stats').prop('checked', false);
+
+  $('#show-stats').change(function() {
+
+    if ( this.checked ) { // if checked then show
+
+      $('#stats').show();
+
+    } else {
+
+      $('#stats').hide();
+
+    }
+
+  });
+
+  // See comment above re: FF
+  $('#invert-colors').prop('checked', false);
+
   hepml.camera = new THREE.PerspectiveCamera(75, w/h, 0.1, 1000);
   // width, height, fov, near, far, orthoNear, orthoFar
   //hepml.camera = new THREE.CombinedCamera(w, h, 75, 0.1, 1000, 0.1, 1000);
@@ -241,9 +263,11 @@ hepml.invertColors = function() {
 
   }
 
-  $('#body').toggleClass('white').toggleClass('black');
+  $('body').toggleClass('white').toggleClass('black');
+
   $('#titlebar').toggleClass('white').toggleClass('black');
   $('#toolbar').toggleClass('white').toggleClass('black');
+  $('#display').toggleClass('white').toggleClass('black');
 
   $('#treeview').toggleClass('white').toggleClass('black');
   $('.table tr').toggleClass('white').toggleClass('black');
@@ -315,6 +339,22 @@ hepml.print = function() {
 
 };
 
+hepml.onWindowResize = function() {
+
+  $('#display').removeAttr('style');
+
+  var w = $('#display').innerWidth();
+  var h = $('#display').innerHeight();
+
+  hepml.camera.aspect = w/h;
+  hepml.camera.updateProjectionMatrix();
+
+  hepml.renderer.setSize(w,h);
+  hepml.render();
+
+}
+
+window.addEventListener('resize', hepml.onWindowResize, false);
 
 hepml.onMouseMove = function(e) {
 
