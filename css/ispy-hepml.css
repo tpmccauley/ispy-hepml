@@ -16,6 +16,15 @@ canvas {
   left: 0;
 }
 
+#axes  {
+  border: none;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  z-index: 1001;
+  background-color: transparent;
+}
+
 .bordered {
   border: thin solid gray;
 }

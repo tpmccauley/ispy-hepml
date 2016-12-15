@@ -33,12 +33,14 @@ hepml.hcal_settings = {
 
 hepml.init = function() {
 
-  var w = window.innerWidth;
-  var h = window.innerHeight;
+  var display = document.getElementById('display');
+
+  var w = display.clientWidth;
+  var h = display.clientHeight;
 
   hepml.scene = new THREE.Scene();
   hepml.stats = new Stats();
-  document.getElementById('display').appendChild(hepml.stats.domElement);
+  display.appendChild(hepml.stats.domElement);
 
   // On page load hide the stats
   $('#stats').hide();
@@ -63,18 +65,28 @@ hepml.init = function() {
   $('#invert-colors').prop('checked', false);
 
   hepml.camera = new THREE.PerspectiveCamera(75, w/h, 0.1, 1000);
-  // width, height, fov, near, far, orthoNear, orthoFar
-  //hepml.camera = new THREE.CombinedCamera(w, h, 75, 0.1, 1000, 0.1, 1000);
 
   hepml.camera.position.x = -15;
   hepml.camera.position.y = 15;
   hepml.camera.position.z = -15;
 
-  hepml.renderer = new THREE.WebGLRenderer({antialias:true});
+  hepml.camera.up = new THREE.Vector3(0,1,0);
+  hepml.camera.lookAt(new THREE.Vector3(0,0,0));
+
+  hepml.inset_camera = new THREE.PerspectiveCamera(70, 1, 1, 100);
+  hepml.inset_camera.up = hepml.camera.up;
+
+  hepml.renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
   hepml.renderer.setSize(w, h);
   hepml.renderer.setPixelRatio(window.devicePixelRatio ? window.devicePixelRatio : 1);
 
   document.getElementById('display').appendChild(hepml.renderer.domElement);
+
+  hepml.inset_renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+  hepml.inset_renderer.setSize(h/5, h/5);
+  hepml.inset_renderer.setPixelRatio(window.devicePixelRatio ? window.devicePixelRatio : 1);
+
+  document.getElementById('axes').appendChild(hepml.inset_renderer.domElement);
 
   hepml.controls = new THREE.TrackballControls(hepml.camera, hepml.renderer.domElement);
   hepml.controls.rotateSpeed = 3.0;
@@ -89,9 +101,11 @@ hepml.init = function() {
   directionalLight.position.set(0, 0.5, 1);
   hepml.scene.add(directionalLight);
 
-  var axes = new THREE.AxisHelper(2);
-  axes.name = 'Axes';
-  hepml.scene.add(axes);
+  hepml.inset_scene = new THREE.Scene();
+
+  var axes = new THREE.AxisHelper(5);
+  axes.material.linewidth = 2;
+  hepml.inset_scene.add(axes);
 
   hepml.raycaster = new THREE.Raycaster();
   hepml.raycaster.linePrecision = 0.1;
@@ -176,10 +190,10 @@ hepml.render = function() {
       requestAnimationFrame(hepml.render);
     },  1000 / hepml.max_framerate );
 
-  //requestAnimationFrame(hepml.render);
   hepml.renderer.render(hepml.scene, hepml.camera);
+  hepml.inset_renderer.render(hepml.inset_scene, hepml.inset_camera);
 
-  if ( hepml.get_image_data ){
+  if ( hepml.get_image_data ) {
 
     hepml.image_data = hepml.renderer.domElement.toDataURL();
     hepml.get_image_data = false;
@@ -188,6 +202,12 @@ hepml.render = function() {
 
   hepml.controls.update();
   hepml.stats.update();
+
+  hepml.inset_camera.position.subVectors(hepml.camera.position, hepml.controls.target);
+  hepml.inset_camera.up = hepml.camera.up;
+  hepml.inset_camera.quarternion = hepml.camera.quaternion;
+  hepml.inset_camera.position.setLength(10);
+  hepml.inset_camera.lookAt(hepml.inset_scene.position);
 
 };
 
@@ -272,10 +292,13 @@ hepml.invertColors = function() {
   if ( hepml.inverted_colors ) {
 
     hepml.renderer.setClearColor(0x000000,1);
+    hepml.inset_renderer.setClearColor(0x000000,0);
+
 
   } else {
 
     hepml.renderer.setClearColor(0xffffff,1);
+    hepml.inset_renderer.setClearColor(0xffffff,0);
 
   }
 
