@@ -15,6 +15,22 @@ hepml.setFramerate = function(fr) {
 
 };
 
+hepml.ecal_settings = {
+  color: 0xaaaaaa,
+  linewidth: 0.1,
+  depthWrite: false,
+  transparent:true,
+  opacity: 0.1
+};
+
+hepml.hcal_settings = {
+  color: 0xaaaaaa,
+  linewidth: 0.1,
+  depthWrite: false,
+  transparent:true,
+  opacity: 0.5
+};
+
 hepml.init = function() {
 
   var w = window.innerWidth;
@@ -396,13 +412,7 @@ hepml.makeECAL = function(style) {
   var cy = cx;
   var cz = cx;
 
-  var material = new THREE.LineBasicMaterial({
-    color: 0xaaaaaa,
-    linewidth: 0.1,
-    depthWrite: true,
-    transparent:true,
-    opacity: 0.1
-  });
+  var material = new THREE.LineBasicMaterial(hepml.ecal_settings);
 
   var boxes = new THREE.Geometry();
 
@@ -471,13 +481,7 @@ hepml.makeHCAL = function(style) {
     var cy = cx;
     var cz = cx;
 
-    var material = new THREE.LineBasicMaterial({
-      color: 0xaaaaaa,
-      linewidth: 0.1,
-      depthWrite: true,
-      transparent:true,
-      opacity: 0.5
-    });
+    var material = new THREE.LineBasicMaterial(hepml.hcal_settings);
 
     var boxes = new THREE.Geometry();
 
