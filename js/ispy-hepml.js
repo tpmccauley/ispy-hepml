@@ -20,7 +20,7 @@ hepml.ecal_settings = {
   linewidth: 0.1,
   depthWrite: false,
   transparent:true,
-  opacity: 0.1
+  opacity: 0.05
 };
 
 hepml.hcal_settings = {
@@ -28,7 +28,7 @@ hepml.hcal_settings = {
   linewidth: 0.1,
   depthWrite: false,
   transparent:true,
-  opacity: 0.5
+  opacity: 0.25
 };
 
 hepml.init = function() {
@@ -413,7 +413,6 @@ hepml.makeECAL = function(style) {
   var cz = cx;
 
   var material = new THREE.LineBasicMaterial(hepml.ecal_settings);
-
   var boxes = new THREE.Geometry();
 
   for ( var i = 0; i < nx; i++ ) {
@@ -466,7 +465,11 @@ hepml.makeECAL = function(style) {
     }
   }
 
-  ecal = new THREE.LineSegments(boxes, material);
+  var geometry = new THREE.BufferGeometry();
+  var positions = new Float32Array(boxes.vertices.length*3);
+  geometry.addAttribute('position', new THREE.BufferAttribute(positions, 3).copyVector3sArray(boxes.vertices));
+
+  var ecal = new THREE.LineSegments(geometry, material);
   hepml.scene.getObjectByName('ECAL').add(ecal);
 
 };
@@ -482,7 +485,6 @@ hepml.makeHCAL = function(style) {
     var cz = cx;
 
     var material = new THREE.LineBasicMaterial(hepml.hcal_settings);
-
     var boxes = new THREE.Geometry();
 
     for ( var i = 0; i < nx; i++ ) {
@@ -535,7 +537,11 @@ hepml.makeHCAL = function(style) {
       }
     }
 
-    hcal = new THREE.LineSegments(boxes, material);
+    var geometry = new THREE.BufferGeometry();
+    var positions = new Float32Array(boxes.vertices.length*3);
+    geometry.addAttribute('position', new THREE.BufferAttribute(positions, 3).copyVector3sArray(boxes.vertices));
+
+    var hcal = new THREE.LineSegments(geometry, material);
     hepml.scene.getObjectByName('HCAL').add(hcal);
 
 };
@@ -682,7 +688,7 @@ hepml.addPrimary = function(p) {
   var arrow = new THREE.ArrowHelper(dir, new THREE.Vector3(0,0,-17), 2, 0xffff00, 0.5, 1);
   arrow.line.material.linewidth = 3;
 
-  console.log(p[0]);
+  //console.log(p[0]);
 
   //hepml.scene.getObjectByName('Primary').add(arrow);
 
