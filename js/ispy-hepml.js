@@ -209,6 +209,9 @@ hepml.init = function() {
   hepml.setFramerate(30.0);
   $('#fps-slider').prop('value', hepml.max_framerate);
 
+  hepml.mouse = new THREE.Vector2();
+  hepml.intersected = null;
+
 };
 
 hepml.render = function() {
@@ -216,6 +219,32 @@ hepml.render = function() {
   setTimeout( function() {
       requestAnimationFrame(hepml.render);
     },  1000 / hepml.max_framerate );
+
+  hepml.raycaster.setFromCamera(hepml.mouse, hepml.camera);
+
+  var intersects = hepml.raycaster.intersectObjects(hepml.scene.getObjectByName('Event').children, true);
+
+  if ( intersects.length > 0 ) {
+
+    if ( hepml.intersected != intersects[0].object ) {
+
+        if ( hepml.intersected ) {
+          hepml.intersected.material.color.setHex(hepml.intersected.current_color);
+        }
+
+        hepml.intersected = intersects[0].object;
+        hepml.intersected.current_color = hepml.intersected.material.color.getHex();
+        hepml.intersected.material.color.setHex(0xcccccc);
+    }
+
+  } else {
+
+    if ( hepml.intersected ) {
+      hepml.intersected.material.color.setHex(hepml.intersected.current_color);
+    }
+
+    hepml.intersected = null;
+  }
 
   hepml.renderer.render(hepml.scene, hepml.camera);
   hepml.inset_renderer.render(hepml.inset_scene, hepml.inset_camera);
@@ -426,8 +455,6 @@ hepml.onMouseMove = function(e) {
 
   e.preventDefault();
 
-  var container = $("canvas");
-
   var w = $('#display').innerWidth();
   var h = $('#display').innerHeight();
 
@@ -440,10 +467,6 @@ hepml.onMouseMove = function(e) {
 
   hepml.mouse.x = ((e.clientX-offsetX) / w)*2 - 1;
   hepml.mouse.y = -((e.clientY-offsetY) / h)*2 +1;
-
-  var vector = new THREE.Vector3(hepml.mouse.x, hepml.mouse.y, 0.5).unproject(hepml.camera);
-  hepml.raycaster.set(hepml.camera.position, vector.subVectors(vector, hepml.camera.position).normalize());
-  var intersects = hepml.raycaster.intersectObject(hepml.scene.getObjectByName('Event'), true);
 
 };
 
