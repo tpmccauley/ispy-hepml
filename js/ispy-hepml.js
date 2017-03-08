@@ -103,9 +103,36 @@ hepml.init = function() {
 
   hepml.inset_scene = new THREE.Scene();
 
-  var axes = new THREE.AxisHelper(5);
+  var axis_length = 4.0;
+  var axes = new THREE.AxisHelper(axis_length);
   axes.material.linewidth = 2;
   hepml.inset_scene.add(axes);
+
+  var font_loader = new THREE.FontLoader();
+  font_loader.load('./fonts/helvetiker_regular.typeface.json', function(font) {
+
+    var tps = {size:0.75, height:0.1, font:font};
+
+    var x_geo = new THREE.TextGeometry('X', tps);
+    var y_geo = new THREE.TextGeometry('Y', tps);
+    var z_geo = new THREE.TextGeometry('Z', tps);
+
+    var x_material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+    var x_text = new THREE.Mesh(x_geo, x_material);
+    x_text.position.x = axis_length+0.5;
+
+    var y_material = new THREE.MeshBasicMaterial({ color: 0x00ff00});
+    var y_text = new THREE.Mesh(y_geo, y_material);
+    y_text.position.y = axis_length+0.5;
+
+    var z_material = new THREE.MeshBasicMaterial({ color: 0x0000ff});
+    var z_text = new THREE.Mesh(z_geo, z_material);
+    z_text.position.z = axis_length+0.5;
+
+    hepml.inset_scene.add(x_text);
+    hepml.inset_scene.add(y_text);
+    hepml.inset_scene.add(z_text);
+  });
 
   hepml.raycaster = new THREE.Raycaster();
   hepml.raycaster.linePrecision = 0.1;
