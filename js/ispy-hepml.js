@@ -1,5 +1,5 @@
 var hepml = hepml || {};
-hepml.version = '0.0.2';
+hepml.version = '0.0.3';
 
 hepml.event_index = 0;
 hepml.events = [];
@@ -7,6 +7,8 @@ hepml.event_loaded = false;
 
 hepml.visible = [];
 hepml.inverted_colors = false;
+
+hepml.objectIds = [];
 
 hepml.setFramerate = function(fr) {
 
@@ -212,6 +214,9 @@ hepml.init = function() {
   hepml.mouse = new THREE.Vector2();
   hepml.intersected = null;
 
+  $('#hepml-version').html('v'+hepml.version);
+  $('#threejs-version').html('r'+THREE.REVISION);
+
 };
 
 hepml.render = function() {
@@ -235,6 +240,7 @@ hepml.render = function() {
         hepml.intersected = intersects[0].object;
         hepml.intersected.current_color = hepml.intersected.material.color.getHex();
         hepml.intersected.material.color.setHex(0xcccccc);
+
     }
 
   } else {
@@ -470,7 +476,36 @@ hepml.onMouseMove = function(e) {
 
 };
 
-hepml.onMouseDown = function() {};
+hepml.onMouseDown = function() {
+
+  if ( hepml.intersected ) {
+
+    var iobj = hepml.intersected;
+    var data, name, ei;
+
+    if ( iobj.parent.name === 'EHits' ) {
+      data = hepml.current_event.ecal[iobj.userData.index];
+      name = 'ECAL hit'
+      ei = 3;
+    }
+
+    if ( iobj.parent.name === 'HHits' ) {
+      data = hepml.current_event.hcal[iobj.userData.index];
+      name = 'HCAL hit';
+      ei = 3;
+    }
+
+    $('#collection-name').html(name);
+
+    //console.log(iobj.parent.name, iobj.id, iobj.userData.index, data);
+
+    $('#object-data .modal-body').empty().html(data[ei].toFixed(3) + ' GeV');
+
+    $('#object-data').modal('show');
+
+  }
+
+};
 
 hepml.ecal = [25,25,25,0.4];
 hepml.hcal = [5,5,60,2.0];
@@ -822,6 +857,9 @@ hepml.addECALhits = function(ecal) {
     box.position.y = y;
     box.position.z = z - 15;
 
+    box.userData.index = e;
+    hepml.objectIds.push(box.id);
+
     ehits.add(box);
 
   }
@@ -888,6 +926,9 @@ hepml.addHCALhits = function(hcal) {
     box.position.y = y;
     box.position.z = z + 5;
 
+    box.userData.index = h;
+    hepml.objectIds.push(box.id);
+
     hhits.add(box);
 
   }
@@ -907,6 +948,7 @@ hepml.addEvent = function() {
   hepml.scene.getObjectByName('Primary').children.length = 0;
 
   var data = hepml.events[hepml.event_index];
+  hepml.current_event = data;
 
   var ievent = +hepml.event_index + 1; // JavaScript!
 
