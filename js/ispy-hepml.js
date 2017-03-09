@@ -10,6 +10,30 @@ hepml.inverted_colors = false;
 
 hepml.objectIds = [];
 
+hepml.schema = {
+
+  'ecal': [{'ix':'int'}, {'iy':'int'}, {'iz':'int'}, {'energy':'float'}],
+  'hcal': [{'ix':'int'}, {'iy':'int'}, {'iz':'int'}, {'energy':'float'}],
+  'primary': [{'i':'int'}, {'pid':'int'}, {'px':'float'}, {'py':'float'}, {'pz':'float'}, {'energy':'float'}]
+
+};
+
+hepml.get_type = function(name, attr) {
+
+  // from a name like ecal and an attr like energy return its type: float
+  return hepml.schema[name]
+    .find(function(obj) {return obj.hasOwnProperty(attr);})[attr];
+
+};
+
+hepml.get_index = function(name, attr) {
+
+  // from a name like ecal and an attr like energy return its index: 3
+  var o = hepml.schema[name].find(function(obj) {return obj.hasOwnProperty(attr)});
+  return hepml.schema[name].indexOf(o);
+
+};
+
 hepml.setFramerate = function(fr) {
 
   hepml.max_framerate = fr;
@@ -18,19 +42,23 @@ hepml.setFramerate = function(fr) {
 };
 
 hepml.ecal_settings = {
+
   color: 0xaaaaaa,
   linewidth: 0.1,
   depthWrite: false,
   transparent:true,
   opacity: 0.05
+
 };
 
 hepml.hcal_settings = {
+
   color: 0xaaaaaa,
   linewidth: 0.1,
   depthWrite: false,
   transparent:true,
   opacity: 0.25
+
 };
 
 hepml.init = function() {
@@ -486,26 +514,23 @@ hepml.onMouseDown = function() {
     if ( iobj.parent.name === 'EHits' ) {
       data = hepml.current_event.ecal[iobj.userData.index];
       name = 'ECAL hit'
-      ei = 3;
+      ei = hepml.get_index('ecal', 'energy');
     }
 
     if ( iobj.parent.name === 'HHits' ) {
       data = hepml.current_event.hcal[iobj.userData.index];
       name = 'HCAL hit';
-      ei = 3;
+      ei = hepml.get_index('hcal', 'energy');
     }
 
     $('#collection-name').html(name);
-
-    //console.log(iobj.parent.name, iobj.id, iobj.userData.index, data);
-
-    $('#object-data .modal-body').empty().html(data[ei].toFixed(3) + ' GeV');
-
+    $('#object-data .modal-body').empty().html(data[ei].toPrecision(5) + ' GeV');
     $('#object-data').modal('show');
 
   }
 
 };
+
 
 hepml.ecal = [25,25,25,0.4];
 hepml.hcal = [5,5,60,2.0];
@@ -725,18 +750,6 @@ hepml.showTable = function(name) {
 
   }
 
-  var column_names;
-
-  if ( name === 'ecal' || name === 'hcal' ) {
-
-    column_names = ['i','ix','iy','iz','energy'];
-
-  } else if ( name === 'primary' ) {
-
-    column_names = ['i','pid','px','py','pz','energy'];
-
-  }
-
   var collectionTable = $('#collection-table');
 
   collectionTable.empty();
@@ -744,48 +757,54 @@ hepml.showTable = function(name) {
   collectionTable.append('<thead> <tr>');
   var collectionTableHead = collectionTable.find('thead').find('tr');
 
-  for ( var c in column_names ) {
+  collectionTableHead.append($('<th data-sort="int"><i class="fa fa-sort"></i> i</th>'));
 
-    var dataSort = "float";
-    collectionTableHead.append($('<th data-sort="' + dataSort + '"><i class="fa fa-sort"></i> ' + column_names[c] + '</th>'));
-
-  }
+  hepml.schema[name].forEach(function(obj){
+      for ( var c in obj ) {
+        var dataSort = obj[c];
+        collectionTableHead.append($('<th data-sort="' + dataSort + '"><i class="fa fa-sort"></i> ' + c + '</th>'));
+      }
+  });
 
   var data = hepml.events[hepml.event_index][name];
 
-  var index = 0;
-
-  for ( var d in data ) {
+  for ( var i = 0; i < data.length; i++ ) {
 
     var row_content = "<tr class=";
 
     if ( hepml.inverted_colors )
-        row_content += "'white'/>";
+        row_content += "'white'>";
     else
-        row_content += "'black'/>";
+        row_content += "'black'>";
 
-    row_content += "<td>" + index + "</td>";
-    index++;
+    row_content += "<td>" + i + "</td>";
 
-    for ( var di in data[d] ) {
+    for ( var j = 0; j < data[i].length; j++ ) {
 
-      row_content += "<td>"+ data[d][di] + "</td>";
+      var vo = hepml.schema[name][j];
+
+      for ( v in vo ) {
+
+        var rc = vo[v] === 'float' ? data[i][j].toPrecision(5) : data[i][j];
+        row_content += "<td>"+ rc + "</td>";
+
+      }
 
     }
 
-      collectionTable.append(row_content);
+    collectionTable.append(row_content);
   }
 
-  collectionTable.stupidtable().bind('aftertablesort', function(event, data){
-
-    collectionTableHead.find('th').find('i').removeClass().addClass('fa fa-sort');
-    var newClass = "fa fa-sort-" + data.direction;
-    collectionTableHead.find('th').eq(data.column).find('i').removeClass().addClass(newClass);
-
-  });
+  collectionTable.stupidtable()
+    .bind('aftertablesort', function(event, data){
+      collectionTableHead.find('th').find('i').removeClass().addClass('fa fa-sort');
+      var newClass = "fa fa-sort-" + data.direction;
+      collectionTableHead.find('th').eq(data.column).find('i').removeClass().addClass(newClass);
+    });
+  var $th_to_sort = collectionTable.find("thead th").eq(0);
+  $th_to_sort.stupidsort();
 
 };
-
 
 hepml.addPrimary = function(p) {
 
