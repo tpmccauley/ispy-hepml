@@ -7,6 +7,7 @@ hepml.event_loaded = false;
 
 hepml.visible = [];
 hepml.inverted_colors = false;
+hepml.table_shown = null;
 
 hepml.objectIds = {
 
@@ -316,7 +317,7 @@ hepml.zoomIn = function() {
     var zoom = hepml.camera.zoom;
     hepml.camera.setZoom(zoom+0.5);
   }
-  
+
 };
 
 hepml.zoomOut = function() {
@@ -529,10 +530,20 @@ hepml.onMouseMove = function(e) {
           hepml.intersected.material.color.setHex(hepml.intersected.current_color);
 
           if ( hepml.intersected.parent.name === 'EHits' ) {
+
+            if ( hepml.table_shown !== 'ecal' ) {
+              hepml.showTable('ecal');
+            }
+
             hepml.highlightRow('ecal_'+hepml.intersected.userData.index, false);
           }
 
           if ( hepml.intersected.parent.name === 'HHits' ) {
+
+            if ( hepml.table_shown !== 'hcal' ) {
+              hepml.showTable('hcal');
+            }
+
             hepml.highlightRow('hcal_'+hepml.intersected.userData.index, false);
           }
 
@@ -543,10 +554,20 @@ hepml.onMouseMove = function(e) {
         hepml.intersected.material.color.setHex(0xcccccc);
 
         if ( hepml.intersected.parent.name === 'EHits' ) {
+
+          if ( hepml.table_shown !== 'ecal' ) {
+            hepml.showTable('ecal');
+          }
+
           hepml.highlightRow('ecal_'+hepml.intersected.userData.index, true);
         }
 
         if ( hepml.intersected.parent.name === 'HHits' ) {
+
+          if ( hepml.table_shown !== 'hcal' ) {
+            hepml.showTable('hcal');
+          }
+
           hepml.highlightRow('hcal_'+hepml.intersected.userData.index, true);
         }
 
@@ -913,6 +934,8 @@ hepml.showTable = function(name) {
   var $th_to_sort = collectionTable.find("thead th").eq(0);
   $th_to_sort.stupidsort();
 
+  hepml.table_shown = name;
+
 };
 
 hepml.addPrimary = function(p) {
@@ -1089,7 +1112,7 @@ hepml.addEvent = function() {
   hepml.event_loaded = true;
 
   $('#collection-table').empty();
-  $('#collection-table').append('Click on the names "Primary", "ECAL Hits", or "HCAL Hits" to display here in the table view');
+  $('#collection-table').append('Click on the names "Primary", "ECAL Hits", or "HCAL Hits" OR hover over a hit in the 3D view to display here in the table view');
 
 };
 
@@ -1105,6 +1128,10 @@ hepml.nextEvent = function() {
   if ( hepml.events && hepml.events.length-1 > hepml.event_index ) {
     hepml.event_index++;
     hepml.addEvent();
+
+    if ( hepml.table_shown ) {
+      hepml.showTable(hepml.table_shown);
+    }
   }
 
 };
@@ -1114,6 +1141,10 @@ hepml.prevEvent = function() {
   if ( hepml.events && hepml.event_index > 0) {
     hepml.event_index--;
     hepml.addEvent();
+
+    if ( hepml.table_shown ) {
+      hepml.showTable(hepml.table_shown);
+    }
   }
 
 };
