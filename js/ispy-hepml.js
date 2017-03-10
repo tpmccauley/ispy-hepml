@@ -1,5 +1,5 @@
 var hepml = hepml || {};
-hepml.version = '0.0.3';
+hepml.version = '0.0.4';
 
 hepml.event_index = 0;
 hepml.events = [];
@@ -8,7 +8,13 @@ hepml.event_loaded = false;
 hepml.visible = [];
 hepml.inverted_colors = false;
 
-hepml.objectIds = [];
+hepml.objectIds = {
+
+  'ecal': [],
+  'hcal': [],
+  'primary': []
+
+};
 
 hepml.schema = {
 
@@ -253,33 +259,6 @@ hepml.render = function() {
       requestAnimationFrame(hepml.render);
     },  1000 / hepml.max_framerate );
 
-  hepml.raycaster.setFromCamera(hepml.mouse, hepml.camera);
-
-  var intersects = hepml.raycaster.intersectObjects(hepml.scene.getObjectByName('Event').children, true);
-
-  if ( intersects.length > 0 ) {
-
-    if ( hepml.intersected != intersects[0].object ) {
-
-        if ( hepml.intersected ) {
-          hepml.intersected.material.color.setHex(hepml.intersected.current_color);
-        }
-
-        hepml.intersected = intersects[0].object;
-        hepml.intersected.current_color = hepml.intersected.material.color.getHex();
-        hepml.intersected.material.color.setHex(0xcccccc);
-
-    }
-
-  } else {
-
-    if ( hepml.intersected ) {
-      hepml.intersected.material.color.setHex(hepml.intersected.current_color);
-    }
-
-    hepml.intersected = null;
-  }
-
   hepml.renderer.render(hepml.scene, hepml.camera);
   hepml.inset_renderer.render(hepml.inset_scene, hepml.inset_camera);
 
@@ -502,6 +481,59 @@ hepml.onMouseMove = function(e) {
   hepml.mouse.x = ((e.clientX-offsetX) / w)*2 - 1;
   hepml.mouse.y = -((e.clientY-offsetY) / h)*2 +1;
 
+  hepml.raycaster.setFromCamera(hepml.mouse, hepml.camera);
+
+  var intersects = hepml.raycaster.intersectObjects(hepml.scene.getObjectByName('Event').children, true);
+
+  if ( intersects.length > 0 ) {
+
+    if ( hepml.intersected != intersects[0].object ) {
+
+        if ( hepml.intersected ) {
+          hepml.intersected.material.color.setHex(hepml.intersected.current_color);
+
+          if ( hepml.intersected.parent.name === 'EHits' ) {
+            hepml.highlightRow('ecal_'+hepml.intersected.userData.index, false);
+          }
+
+          if ( hepml.intersected.parent.name === 'HHits' ) {
+            hepml.highlightRow('hcal_'+hepml.intersected.userData.index, false);
+          }
+
+        }
+
+        hepml.intersected = intersects[0].object;
+        hepml.intersected.current_color = hepml.intersected.material.color.getHex();
+        hepml.intersected.material.color.setHex(0xcccccc);
+
+        if ( hepml.intersected.parent.name === 'EHits' ) {
+          hepml.highlightRow('ecal_'+hepml.intersected.userData.index, true);
+        }
+
+        if ( hepml.intersected.parent.name === 'HHits' ) {
+          hepml.highlightRow('hcal_'+hepml.intersected.userData.index, true);
+        }
+
+    }
+
+  } else {
+
+    if ( hepml.intersected ) {
+      hepml.intersected.material.color.setHex(hepml.intersected.current_color);
+
+      if ( hepml.intersected.parent.name === 'EHits' ) {
+        hepml.highlightRow('ecal_'+hepml.intersected.userData.index, false);
+      }
+
+      if ( hepml.intersected.parent.name === 'HHits' ) {
+        hepml.highlightRow('hcal_'+hepml.intersected.userData.index, false);
+      }
+
+    }
+
+    hepml.intersected = null;
+  }
+
 };
 
 hepml.onMouseDown = function() {
@@ -531,6 +563,46 @@ hepml.onMouseDown = function() {
 
 };
 
+hepml.highlighted = null;
+
+hepml.highlightObject = function(objId) {
+
+ var obj = hepml.scene.getObjectById(objId);
+ hepml.highlighted = obj;
+ hepml.highlighted.current_color = obj.material.color.getHex();
+ hepml.highlighted.material.color.setHex(0xcccccc);
+
+};
+
+hepml.unhighlightObject = function() {
+
+  hepml.highlighted.material.color.setHex(hepml.highlighted.current_color);
+  hepml.hightlighted = null;
+
+};
+
+hepml.highlightRow = function(selector, hover) {
+
+  var row = $('#'+selector);
+
+  if ( row ) {
+
+    if ( hover ) {
+
+      var bgcolor = ! hepml.inverted_colors ? "#777777" : "#dfdfdf";
+      row.css("background-color", bgcolor);
+      row.scrollintoview();
+
+    }
+      else {
+
+      row.removeAttr("style");
+
+    }
+
+  }
+
+};
 
 hepml.ecal = [25,25,25,0.4];
 hepml.hcal = [5,5,60,2.0];
@@ -770,7 +842,7 @@ hepml.showTable = function(name) {
 
   for ( var i = 0; i < data.length; i++ ) {
 
-    var row_content = "<tr class=";
+    var row_content = "<tr id="+ name+'_'.concat(i) +" onmouseenter='hepml.highlightObject(" + hepml.objectIds[name][i] + ");' onmouseout='hepml.unhighlightObject();' class=";
 
     if ( hepml.inverted_colors )
         row_content += "'white'>";
@@ -801,6 +873,7 @@ hepml.showTable = function(name) {
       var newClass = "fa fa-sort-" + data.direction;
       collectionTableHead.find('th').eq(data.column).find('i').removeClass().addClass(newClass);
     });
+
   var $th_to_sort = collectionTable.find("thead th").eq(0);
   $th_to_sort.stupidsort();
 
@@ -877,7 +950,7 @@ hepml.addECALhits = function(ecal) {
     box.position.z = z - 15;
 
     box.userData.index = e;
-    hepml.objectIds.push(box.id);
+    hepml.objectIds.ecal.push(box.id);
 
     ehits.add(box);
 
@@ -946,7 +1019,7 @@ hepml.addHCALhits = function(hcal) {
     box.position.z = z + 5;
 
     box.userData.index = h;
-    hepml.objectIds.push(box.id);
+    hepml.objectIds.hcal.push(box.id);
 
     hhits.add(box);
 
