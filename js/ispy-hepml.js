@@ -67,6 +67,32 @@ hepml.hcal_settings = {
 
 };
 
+hepml.init_camera = {
+
+  'x': -15.0,
+  'y': 15.0,
+  'z': -15.0,
+  'zoom': 1.5,
+  'perspective': true,
+  'orthographic': false
+
+};
+
+hepml.initCamera = function() {
+
+  hepml.camera.position.x = hepml.init_camera.x;
+  hepml.camera.position.y = hepml.init_camera.y;
+  hepml.camera.position.z = hepml.init_camera.z;
+
+  hepml.camera.setZoom(hepml.init_camera.zoom);
+  hepml.camera.up = new THREE.Vector3(0,1,0);
+
+  hepml.init_camera.perspective ? hepml.camera.toPerspective() : hepml.camera.toOrthographic();
+
+  hepml.camera.lookAt(new THREE.Vector3(0,0,0));
+
+};
+
 hepml.init = function() {
 
   var display = document.getElementById('display');
@@ -100,14 +126,9 @@ hepml.init = function() {
   // See comment above re: FF
   $('#invert-colors').prop('checked', false);
 
-  hepml.camera = new THREE.PerspectiveCamera(75, w/h, 0.1, 1000);
-
-  hepml.camera.position.x = -15;
-  hepml.camera.position.y = 15;
-  hepml.camera.position.z = -15;
-
-  hepml.camera.up = new THREE.Vector3(0,1,0);
-  hepml.camera.lookAt(new THREE.Vector3(0,0,0));
+  // width, height, fov, near, far, orthoNear, orthoFar
+  hepml.camera = new THREE.CombinedCamera(w, h, 75, 0.1, 1000, 0.1, 1000);
+  hepml.initCamera();
 
   hepml.inset_camera = new THREE.PerspectiveCamera(70, 1, 1, 100);
   hepml.inset_camera.up = hepml.camera.up;
@@ -283,12 +304,29 @@ hepml.render = function() {
 hepml.resetControls = function() {
 
   hepml.controls.reset();
+  hepml.initCamera();
 
 };
 
-hepml.zoom = function(step) {
+hepml.zoomIn = function() {
 
-  var zoom = hepml.camera.zoom;
+  if ( hepml.camera.inPerspectiveMode ) {
+    hepml.camera.position.multiplyScalar(0.5);
+  } else {
+    var zoom = hepml.camera.zoom;
+    hepml.camera.setZoom(zoom+0.5);
+  }
+  
+};
+
+hepml.zoomOut = function() {
+
+  if ( hepml.camera.inPerspectiveMode ) {
+    hepml.camera.position.multiplyScalar(1.5);
+  } else {
+    var zoom = hepml.camera.zoom;
+    hepml.camera.setZoom(zoom-0.5);
+  }
 
 };
 
@@ -298,7 +336,7 @@ hepml.setYX = function() {
 
   hepml.camera.position.x = 0;
   hepml.camera.position.y = 0;
-  hepml.camera.position.z = length;
+  hepml.camera.position.z = -length;
   hepml.camera.up = new THREE.Vector3(0,1,0);
 
   hepml.camera.lookAt(new THREE.Vector3(0,0,0));
@@ -333,7 +371,7 @@ hepml.setYZ = function() {
 
 hepml.perspective = function() {
 
-  //hepml.camera.toPerspective();
+  hepml.camera.toPerspective();
   $('#perspective').toggleClass('active');
   $('#orthographic').toggleClass('active');
 
@@ -341,11 +379,9 @@ hepml.perspective = function() {
 
 hepml.orthographic = function() {
 
-  //hepml.camera.toOrthographic();
+  hepml.camera.toOrthographic();
   $('#perspective').toggleClass('active');
   $('#orthographic').toggleClass('active');
-
-  alert('orthographic projection not implemented yet');
 
 };
 
